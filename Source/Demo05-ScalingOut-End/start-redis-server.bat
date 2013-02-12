@@ -1,0 +1,1 @@
+C:\Users\bradyg\SkyDrive\Sources\redis\msvs\Debug\redis-server.exe

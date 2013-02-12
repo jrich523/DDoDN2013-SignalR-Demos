@@ -1,0 +1,45 @@
+﻿<Page
+    x:Class="SiteMonitR.WindowsClient.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:SiteMonitR.WindowsClient"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <DataTemplate x:Key="SiteTemplate">
+            <Border Width="270" Height="270" Margin="10" Padding="10">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding Color}"/>
+                </Border.Background>
+                <TextBlock TextWrapping="Wrap" Text="{Binding Url}" Style="{StaticResource ItemTextStyle}"/>
+            </Border>
+        </DataTemplate>
+        <Style x:Key="ItemsControlStyle" TargetType="ItemsControl">
+            <Setter Property="ItemsPanel">
+                <Setter.Value>
+                    <ItemsPanelTemplate>
+                        <WrapGrid Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ItemsPresenter />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid Background="{StaticResource ApplicationPageBackgroundThemeBrush}">
+        <ItemsControl ItemsSource="{Binding Sites}" 
+                      Style="{StaticResource ItemsControlStyle}"
+                      ItemTemplate="{StaticResource SiteTemplate}"
+                      HorizontalAlignment="Left" 
+                      VerticalAlignment="Top"
+	    />
+    </Grid>
+</Page>

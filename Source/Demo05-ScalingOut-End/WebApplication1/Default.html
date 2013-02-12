@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
+<body>
+
+    <label>Username</label>
+    <input type="text" id="username" value="Web User" />
+
+    <label>Message</label>
+    <input type="text" id="message" value="Hello World" />
+
+    <button id="send">Send</button>
+
+    <ul id="messages">
+    </ul>
+    <script src="Scripts/jquery-1.6.4.js"></script>
+    <script src="Scripts/jquery.signalR-1.0.0-rc2.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var con = $.hubConnection();
+            var hub = con.createHubProxy('chatHub');
+            hub.on('receiveMessage', function (msg) {   
+                $('#messages').prepend('<li><b>' + msg.username + ':</b>' + msg.message + '</li>');
+            });
+
+            $('#send').click(function () {
+                hub.invoke('SendMessage', {
+                    username: $('#username').val(),
+                    message: $('#message').val()
+                })
+            });
+
+            con.start().done(function () {
+                alert('HubStarted');
+            });
+        });
+    </script>
+
+</body>
+</html>

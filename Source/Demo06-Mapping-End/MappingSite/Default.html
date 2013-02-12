@@ -1,0 +1,70 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
+<body>
+    <div class="map" id="mapDiv"></div>
+    <script src="Scripts/jquery-1.6.4.js"></script>
+    <script src="Scripts/jquery.signalR-1.0.0-rc2.js"></script>
+    <script charset="UTF-8" type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+    <script type="text/javascript">
+        PageController = function () {
+            self = this;
+            self.bingMapsApiKey = '[SET UP YOUR BING API ACCOUNT AND PUT THE KEY HERE';
+            self.map = null;
+            self.connection = null;
+            self.hub = null;
+
+            self.loadMap = function () {
+                self.map = new Microsoft.Maps.Map(document.getElementById("mapDiv"),
+                {
+                    credentials: self.bingMapsApiKey,
+                    center: new Microsoft.Maps.Location(32.799424, -96.824885),
+                    mapTypeId: Microsoft.Maps.MapTypeId.road,
+                    zoom: 9
+                });
+            };
+            self.getPosition = function () {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(self.publishCheckIn);
+                }
+            };
+            self.showPosition = function (position) {
+                self.map.setView(
+                    {
+                        center: new Microsoft.Maps.Location(position.coords.latitude, position.coords.longitude),
+                        zoom: 12
+                    });
+            };
+            self.drawPointOnMap = function (checkin) {
+                var loc = new Microsoft.Maps.Location(checkin.latitude, checkin.longitude);
+                var pin = new Microsoft.Maps.Pushpin(loc);
+                self.map.entities.push(pin);
+            };
+            self.connectToHub = function () {
+                self.connection = $.hubConnection();
+                self.hub = self.connection.createHubProxy('MappingHub');
+                self.hub.on('showCheckIn', function (checkin) {
+                    self.drawPointOnMap(checkin);
+                });
+                self.connection.start(function () {
+                    self.getPosition();
+                });
+            };
+            self.publishCheckIn = function (checkin) {
+                self.hub.invoke('CheckIn', {
+                    latitude: checkin.coords.latitude,
+                    longitude: checkin.coords.longitude
+                })
+            };
+        };
+
+        $(function () {
+            var controller = new PageController();
+            controller.loadMap();
+            controller.connectToHub();
+        });
+    </script>
+</body>
+</html>

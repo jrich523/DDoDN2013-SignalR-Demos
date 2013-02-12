@@ -1,0 +1,68 @@
+﻿@model IEnumerable<SiteMonitR.Web.Models.MonitoredSite>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+@foreach (var item in Model)
+{
+    <div class="site" data-id="@item.Id">
+        <div class="siteName">
+            @Html.DisplayFor(modelItem => item.Url)
+        </div>
+        <div class="iconContainer">
+            <a href="@Url.Content("~/Sites/Details/" + item.Id)" class="icon">&#xE12E;</a>
+            <a href="@Url.Content("~/Sites/Edit/" + item.Id)" class="icon">&#xE1C2;</a>
+            <a href="#" class="icon refresh" data-id="@item.Id">&#xE10D;</a>
+            <a href="@Url.Content("~/Sites/Delete/" + item.Id)" class="icon">&#xE107;</a>
+        </div>
+    </div>
+}
+
+@section scripts
+{
+    <script src="~/Scripts/jquery.signalR-1.0.0-rc2.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $('.site').addClass('Checking');
+
+            var con = $.hubConnection();
+            var hub = con.createHubProxy('SiteMonitorHub');
+
+            hub.on('receiveSiteStatus', function (result) {
+                $('.site[data-id="' + result.SiteId + '"')
+                    .addClass(result.Status);
+            });
+
+            con.start().done(function () {
+                hub.invoke('StartMonitoring');
+            });
+
+            var url = '@Url.Content("~/api/sitechecker")';
+
+            $('.refresh').click(function () {
+                var id = $(this).data('id');
+                var tmpUrl = url + '/' + id;
+
+                $('.site[data-id="' + id + '"').addClass('Checking').removeClass('Up').removeClass('Down');
+
+                $.get(tmpUrl, function (data) {
+                    $('.site[data-id="' + data.SiteId + '"')
+                        .removeClass('Checking')
+                        .addClass(data.Status);
+                });
+            });
+        });
+    </script>
+}
+
+@section footer
+{
+    @ViewBag.environment
+}
